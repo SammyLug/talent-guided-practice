@@ -1,8 +1,21 @@
+// (*line references are subject to change*)
+
+// npm install and import pg 
+  // terminal: npm install pg 
 const pg = require('pg');
 
 const client = new pg.Client(process.env.DATABASE_URL || 'postgres://localhost/talent_db');
 
+// npm install and import uuid 
+  // terminal: npm i uuid
 const uuid = require('uuid');
+
+// AFTER DATA LAYER IS COMPLETE, WE NEED TO HASH THE PASSWORDS FOR SECURITY 
+// npm install and import bcrypt 
+  // terminal: npm i bcrypt
+// add this to the createUser function to ensure the user will have a secure password (*line 59*)
+const bcrypt = require ('bcrypt');
+  
 
 // CREATE TABLES AND EXPORT
 const createTables = async() => {
@@ -14,7 +27,7 @@ const createTables = async() => {
   CREATE TABLE users(
     id UUID PRIMARY KEY,
     username VARCHAR(20) UNIQUE NOT NULL,
-    password VARCHAR(20) NOT NULL
+    password VARCHAR(255) NOT NULL
   );
 
   CREATE TABLE skills(
@@ -45,9 +58,10 @@ const createUser = async({username, password}) => {
   RETURNING *
   `;
 
-  const response = await client.query(SQL, [uuid.v4(), username, password])
+  const response = await client.query(SQL, [uuid.v4(), username, await bcrypt.hash( password, 5)]);
+  // since we added a hash to the password, we need to change the VARCHAR in the table from (20) to (255)
   return response.rows[0];
-  // export at the bottom of db.js && import this function in index.js(line 3)
+  // export at the bottom of db.js && import this function in index.js(*line 3*)
 };
 
 
@@ -60,7 +74,7 @@ const fetchUsers = async()=> {
   `;
   const response = await client.query(SQL);
   return response.rows;
-  // export at the bottom of db.js && import this function in index.js(line 3)
+  // export at the bottom of db.js && import this function in index.js(*line 3*)
   };
 
 // CREATE SKILL FUNCTION
@@ -75,7 +89,7 @@ const createSkill = async({ name }) => {
   `;
   const response = await client.query(SQL, [uuid.v4(), name])
   return response.rows[0];
-  // export at the bottom of db.js && import this function in index.js(line 3)
+  // export at the bottom of db.js && import this function in index.js(*line 3*)
 };
 
 
@@ -88,7 +102,7 @@ const fetchSkills = async()=> {
   `;
   const response = await client.query(SQL);
   return response.rows;
-  // export at the bottom of db.js && import this function in index.js(line 3)
+  // export at the bottom of db.js && import this function in index.js(*line 3*)
 };
 
 // CREATE USERSKILL FUNCTION (each users special skill)
@@ -131,8 +145,14 @@ const fetchUserSkills = async(user_id) => {
     `;
     const response = await client.query(SQL, [ id, user_id ]);
     console.log(response.rows);
-  }
 
+    // ADD TO DISPLAY ERROR MESSAGE IF SOMEONE TRIES TO DELETE A SKILL THAT DOESNT EXIST 
+    // if(!response.rows){
+    //   const error = Error('no user skill found');
+    //   error.status = 500;
+    //   throw error;
+    // }
+  }
 
 module.exports = {
   client, 
@@ -144,5 +164,4 @@ module.exports = {
   createUserSkill,
   fetchUserSkills,
   destroyUserSkill
-  
 };

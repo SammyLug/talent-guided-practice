@@ -45,6 +45,10 @@ const init = async()=> {
    // DESTROY USER SKILL FOR CAM (test)
   await destroyUserSkill(camSpins);
   console.log(await fetchUserSkills(cam.id));
+
+  // ANOTHER EXAMPLE WOULD BE:
+  // await destroyUserSkill(camSplits);
+  // console.log(await fetchUserSkills(cam.id));
    
 };
 
