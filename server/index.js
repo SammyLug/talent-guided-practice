@@ -12,6 +12,45 @@ const {
   destroyUserSkill
 } = require('./db');
 
+// BUILDING BRIDGE TO FRONTEND
+
+// AFTER DATA LAYER IS COMPLETE, CREATE A EXPRESS SERVER 
+// npm install and import express 
+  // npm i express 
+const express = require('express');
+const app = express();
+
+
+// CRUD FUNCTIONS GO HERE - this is completed after data layer //
+
+// CREATE GET SKILLS FUNCTION 
+  //  ue .get to fetch skills 
+app.get('/api/skills', async(req, res, next) => {
+  try {
+    res.send(await fetchSkills());
+  }
+  catch (ex){
+    next(ex)
+  }
+  // curl test this function (console.log) at (*line 33*)
+});
+
+// CREATE GET USERS FUNCTION 
+  // use .get to fetch users
+app.get('/app/users', async(req, res, next) => {
+  try {
+    res.send(await fetchUsers());
+  }
+  catch (ex){
+    next(ex)
+  }
+  // curl test this function (console.log) at (*line 34*)
+});
+
+
+
+
+
 // CONSOLE LOG AWAITING ITEMS TO ENSURE IT IS CONNECTING PROPERLY - remove later 
 const init = async()=> {
   console.log('connecting to database');
@@ -46,9 +85,17 @@ const init = async()=> {
   await destroyUserSkill(camSpins);
   console.log(await fetchUserSkills(cam.id));
 
-  // ANOTHER EXAMPLE WOULD BE:
+  // ANOTHER DESTROY EXAMPLE WOULD BE: 
   // await destroyUserSkill(camSplits);
   // console.log(await fetchUserSkills(cam.id));
+
+  // set up listening port 
+const port = process.env.PORT || 3000;
+app.listen(port, ()=> {
+  console.log(`listening on port ${port}`);
+  console.log(`curl localhost:${port}/api/skills`);
+  console.log(`curl localhost:${port}/api/users`)
+});
    
 };
 
